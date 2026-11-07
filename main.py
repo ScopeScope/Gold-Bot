@@ -8,17 +8,26 @@ import pytz
 import random
 import re
 
-# استدعاء المفاتيح السرية من جيت هاب
+# ==========================================
+# 1. استدعاء المفاتيح السرية من جيت هاب
+# ==========================================
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 FB_PAGE_ID = os.environ.get("FB_PAGE_ID")
 FB_ACCESS_TOKEN = os.environ.get("FB_ACCESS_TOKEN")
+WA_PHONE_ID = os.environ.get("WA_PHONE_ID")
+WA_TOKEN = os.environ.get("WA_TOKEN")
+MY_PHONE_NUMBER = os.environ.get("MY_PHONE_NUMBER")
 
 # معرف القناة بتاعتك على تليجرام
 TELEGRAM_CHAT_ID = "@LahzaBLahzaGold" 
 
+# تهيئة جيميناي
 client = genai.Client(api_key=GEMINI_API_KEY)
 
+# ==========================================
+# 2. دوال مساعدة (الوقت وسحب الأسعار)
+# ==========================================
 def get_egypt_time():
     tz = pytz.timezone('Africa/Cairo')
     now = datetime.now(tz)
@@ -99,6 +108,9 @@ def generate_advice(gold_21, usd_sagh, usd_bank):
         ]
         return random.choice(backup_advices)
 
+# ==========================================
+# 3. دوال النشر على المنصات
+# ==========================================
 def send_to_telegram(message):
     if not TELEGRAM_TOKEN:
         print("❌ توكن تليجرام غير موجود!")
@@ -133,6 +145,35 @@ def send_to_facebook(message):
     except Exception as e:
         print(f"❌ خطأ في الاتصال بفيسبوك: {e}")
 
+def send_to_whatsapp_official(message):
+    if not WA_PHONE_ID or not WA_TOKEN or not MY_PHONE_NUMBER:
+        print("❌ بيانات واتساب الرسمي غير مكتملة!")
+        return
+
+    url = f"https://graph.facebook.com/v18.0/{WA_PHONE_ID}/messages"
+    headers = {
+        "Authorization": f"Bearer {WA_TOKEN}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": MY_PHONE_NUMBER,
+        "type": "text",
+        "text": {"body": message}
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        if response.status_code in [200, 201]:
+            print("✅ تم النشر على الواتساب بنجاح!")
+        else:
+            print(f"❌ فشل النشر على الواتساب: {response.text}")
+    except Exception as e:
+        print(f"❌ خطأ في الاتصال بواتساب: {e}")
+
+# ==========================================
+# 4. التشغيل الرئيسي
+# ==========================================
 if __name__ == "__main__":
     gold_24, gold_21, gold_18, gold_coin, gold_ounce, usd_sagh, usd_bank = get_prices()
     advice = generate_advice(gold_21, usd_sagh, usd_bank)
@@ -157,6 +198,7 @@ if __name__ == "__main__":
     final_post = post.strip()
     print(final_post)
     
-    # تنفيذ النشر
+    # إرسال البوست للمنصات التلاتة
     send_to_telegram(final_post)
     send_to_facebook(final_post)
+    send_to_whatsapp_official(final_post)
