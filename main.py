@@ -1,17 +1,14 @@
+```python
 import os
 import requests
 from bs4 import BeautifulSoup
-from google import genai
-from google.genai import types
 from datetime import datetime
 import pytz
-import random
 import re
 
 # ==========================================
 # 1. استدعاء المفاتيح السرية من جيت هاب
 # ==========================================
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 FB_PAGE_ID = os.environ.get("FB_PAGE_ID")
 FB_ACCESS_TOKEN = os.environ.get("FB_ACCESS_TOKEN")
@@ -21,9 +18,6 @@ MY_PHONE_NUMBER = os.environ.get("MY_PHONE_NUMBER")
 
 # معرف القناة بتاعتك على تليجرام
 TELEGRAM_CHAT_ID = "@LahzaBLahzaGold" 
-
-# تهيئة جيميناي
-client = genai.Client(api_key=GEMINI_API_KEY)
 
 # ==========================================
 # 2. دوال مساعدة (الوقت وسحب الأسعار)
@@ -78,35 +72,6 @@ def get_prices():
 
     return gold_24, gold_21, gold_18, gold_coin, gold_ounce, usd_sagh, usd_bank
 
-def generate_advice(gold_21, usd_sagh, usd_bank):
-    prompt = f"""
-    سعر جرام الذهب عيار 21 اليوم هو {gold_21} جنيه. 
-    سعر دولار الصاغة المحسوب هو {usd_sagh} جنيه، وسعر الدولار الرسمي في البنك هو {usd_bank} جنيه.
-    
-    أنت مستشار مالي روبوت. المطلوب:
-    اكتب نصيحة مباشرة وقصيرة جداً (سطرين كحد أقصى) للمستثمرين.
-    
-    قواعد هامة جداً لعدم تضليل المتابعين:
-    1. لا تنصح بالشراء أو البيع المباشر (لأنك لا تملك بيانات الأسعار السابقة لتعرف هل الاتجاه صاعد أم هابط).
-    2. بدلاً من ذلك، قدم نصيحة مبنية على "إدارة المخاطر" (مثل تقسيم السيولة، مراقبة الفجوة بين دولار الصاغة والبنك).
-    3. يجب أن تبدأ إجابتك نصاً بكلمة: "💡 النصيحة الآن:"
-    4. اكتب بلهجة مصرية احترافية ومفهومة وبدون أي مقدمات.
-    """
-    try:
-        response = client.models.generate_content(
-            model='gemini-2.5-flash', 
-            contents=prompt,
-            config=types.GenerateContentConfig(temperature=0.0)
-        )
-        advice = response.text.strip().replace('"', '').replace('**', '')
-        advice = advice.replace("💡 النصيحة الآن:\n", "💡 النصيحة الآن: ")
-        return advice
-    except Exception as e:
-        backup_advices = [
-            "💡 النصيحة الآن: السوق في حالة ترقب، يُفضل دايماً تقسيم مبلغ الشراء على أجزاء وعدم الدخول بكل السيولة دفعة واحدة.",
-            "💡 النصيحة الآن: احتفظ بجزء من السيولة وراقب الفجوة بين دولار الصاغة ودولار البنك لتحديد أنسب وقت للشراء."
-        ]
-        return random.choice(backup_advices)
 
 # ==========================================
 # 3. دوال النشر على المنصات
@@ -176,11 +141,9 @@ def send_to_whatsapp_official(message):
 # ==========================================
 if __name__ == "__main__":
     gold_24, gold_21, gold_18, gold_coin, gold_ounce, usd_sagh, usd_bank = get_prices()
-    advice = generate_advice(gold_21, usd_sagh, usd_bank)
     current_time = get_egypt_time()
     
-    post = f"""
-الآن 🔴
+    post = f"""الآن 🔴
 تحديث الأسعار ({current_time}):
 
 🟡 عيار 24: {gold_24} جنيه
@@ -190,10 +153,7 @@ if __name__ == "__main__":
 🥇 أوقية الذهب: {gold_ounce} جنيه
 
 💵 دولار الصاغة: {usd_sagh} جنيه
-🏦 دولار البنك: {usd_bank} جنيه
-
-{advice}
-    """
+🏦 دولار البنك: {usd_bank} جنيه"""
     
     final_post = post.strip()
     print(final_post)
@@ -202,3 +162,5 @@ if __name__ == "__main__":
     send_to_telegram(final_post)
     send_to_facebook(final_post)
     send_to_whatsapp_official(final_post)
+
+```
