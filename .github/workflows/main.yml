@@ -2,12 +2,9 @@ name: Hourly Gold Bot
 
 on:
   schedule:
-    - cron: '17 * * * *'   # كل ساعة عند الدقيقة 17 (UTC)
+    - cron: '17 * * * *'   # التشغيلة الأساسية
+    - cron: '43 * * * *'   # التشغيلة الاحتياطية
   workflow_dispatch:        # زرار التشغيل اليدوي
-
-concurrency:
-  group: gold-bot
-  cancel-in-progress: false
 
 jobs:
   run-bot:
