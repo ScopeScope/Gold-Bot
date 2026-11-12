@@ -1,4 +1,4 @@
-```python
+python
 import os
 import requests
 from bs4 import BeautifulSoup
@@ -163,4 +163,3 @@ if __name__ == "__main__":
     send_to_facebook(final_post)
     send_to_whatsapp_official(final_post)
 
-```
